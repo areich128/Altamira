@@ -4,12 +4,12 @@
 // \brief  hpp file for BMP388 component implementation class
 // ======================================================================
 
-#ifndef BMP388_BMP388_HPP
-#define BMP388_BMP388_HPP
+#ifndef BMP388Module_BMP388_HPP
+#define BMP388Module_BMP388_HPP
 
 #include "Components/BMP388/BMP388ComponentAc.hpp"
 
-namespace BMP388 {
+namespace BMP388Module {
 
   class BMP388 :
     public BMP388ComponentBase
@@ -32,15 +32,30 @@ namespace BMP388 {
     PRIVATE:
 
       // ----------------------------------------------------------------------
+      // Handler implementations for user-defined typed input ports
+      // ----------------------------------------------------------------------
+
+      //! Handler implementation for mathResultIn
+      void mathResultIn_handler(
+          NATIVE_INT_TYPE portNum, //!< The port number
+          F32 result //!< random number i guess
+      ) override;
+
+    PRIVATE:
+
+      // ----------------------------------------------------------------------
       // Handler implementations for commands
       // ----------------------------------------------------------------------
 
-      //! Handler implementation for command TODO
+      //! Handler implementation for command SEND_DATA
       //!
-      //! TODO
-      void TODO_cmdHandler(
+      //! Do a math operation
+      void SEND_DATA_cmdHandler(
           FwOpcodeType opCode, //!< The opcode
-          U32 cmdSeq //!< The command sequence number
+          U32 cmdSeq, //!< The command sequence number
+          F32 pressure, //!< pressure
+          F32 temp, //!< temp
+          F32 altitude //!< altitude
       ) override;
 
   };

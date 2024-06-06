@@ -1,60 +1,93 @@
-module BMP388 {
-    @ BMP388 altitude/pressure/temp sensor driver
-    active component BMP388 {
+module BMP388Module {
 
-        # One async command/port is required for active components
-        # This should be overridden by the developers with a useful command/port
-        @ TODO
-        async command TODO opcode 0
+  @ Component for sending a math operation
+  active component BMP388 {
 
-        ##############################################################################
-        #### Uncomment the following examples to start customizing your component ####
-        ##############################################################################
+    # ----------------------------------------------------------------------
+    # General ports
+    # ----------------------------------------------------------------------
 
-        # @ Example async command
-        # async command COMMAND_NAME(param_name: U32)
+    @ Port for sending the operation request
+    output port BMPRequest: BMPDataPorts.BMPDataRequest
 
-        # @ Example telemetry counter
-        # telemetry ExampleCounter: U64
+    async input port mathResultIn: BMPDataPorts.MathResult
 
-        # @ Example event
-        # event ExampleStateEvent(example_state: Fw.On) severity activity high id 0 format "State set to {}"
+    output port I2C_Write: Drv.I2c
+    output port I2C_Read: Drv.I2c
+    output port I2C_ReadWrite: Drv.I2cReadWrite
 
-        # @ Example port: receiving calls from the rate group
-        # sync input port run: Svc.Sched
+    # @ Port for receiving the result
+    # async input port mathResultIn: MathResult
 
-        # @ Example parameter
-        # param PARAMETER_NAME: U32
+    # ----------------------------------------------------------------------
+    # Special ports
+    # ----------------------------------------------------------------------
 
-        ###############################################################################
-        # Standard AC Ports: Required for Channels, Events, Commands, and Parameters  #
-        ###############################################################################
-        @ Port for requesting the current time
-        time get port timeCaller
+    @ Command receive port
+    command recv port cmdIn
 
-        @ Port for sending command registrations
-        command reg port cmdRegOut
+    @ Command registration port
+    command reg port cmdRegOut
 
-        @ Port for receiving commands
-        command recv port cmdIn
+    @ Command response port
+    command resp port cmdResponseOut
 
-        @ Port for sending command responses
-        command resp port cmdResponseOut
+    @ Event port
+    event port eventOut
 
-        @ Port for sending textual representation of events
-        text event port logTextOut
+    @ Telemetry port
+    telemetry port tlmOut
 
-        @ Port for sending events to downlink
-        event port logOut
+    @ Text event port
+    text event port textEventOut
 
-        @ Port for sending telemetry channels to downlink
-        telemetry port tlmOut
+    @ Time get port
+    time get port timeGetOut
 
-        @ Port to return the value of a parameter
-        param get port prmGetOut
+    # ----------------------------------------------------------------------
+    # Commands
+    # ----------------------------------------------------------------------
 
-        @Port to set the value of a parameter
-        param set port prmSetOut
+    @ Do a math operation
+    async command SEND_DATA(
+                           pressure: F32 @< pressure
+                           temp: F32 @< temp
+                           altitude: F32 @< altitude
+                         )
 
-    }
+    # ----------------------------------------------------------------------
+    # Events
+    # ----------------------------------------------------------------------
+
+    @ Data command received
+    event COMMAND_RECV(
+                        pressure: F32 @< pressure data
+                        temp: F32 @< temp data
+                        altitude: F32 @< altitude data
+                      ) \
+      severity activity low \
+      format "Math command received: {f} {f} {f}"
+
+    # @ Received math result
+    # event RESULT(
+    #               result: F32 @< The math result
+    #             ) \
+    #   severity activity high \
+    #   format "Math result is {f}"
+
+    # ----------------------------------------------------------------------
+    # Telemetry
+    # ----------------------------------------------------------------------
+
+    @ The pressure
+    telemetry PRESSURE: F32
+
+    @ The temp
+    telemetry TEMP: F32
+
+    @ The altitude
+    telemetry ALTITUDE: F32
+
+  }
+
 }
