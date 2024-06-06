@@ -14,7 +14,7 @@ module BMP388Module {
 
     output port I2C_Write: Drv.I2c
     output port I2C_Read: Drv.I2c
-    output port I2C_ReadWrite: Drv.I2cReadWrite
+    output port I2C_ReadWrite: Drv.I2cWriteRead
 
     # @ Port for receiving the result
     # async input port mathResultIn: MathResult
