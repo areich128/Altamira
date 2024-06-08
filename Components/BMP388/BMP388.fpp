@@ -21,7 +21,7 @@ module BMP388Module {
     @I2C Ports
     output port I2C_Write: Drv.I2c
     output port I2C_Read: Drv.I2c
-    output port I2C_ReadWrite: Drv.I2cWriteRead
+    output port I2C_WriteRead: Drv.I2cWriteRead
 
     @ input port to run repeated actions, connected to ActiveRateGroup component output port
     sync input port SchedIn: [1] Svc.Sched

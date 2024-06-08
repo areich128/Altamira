@@ -6,8 +6,6 @@
 
 #include "Components/BMP388/BMP388.hpp"
 #include "FpConfig.hpp"
-#include "Fw/Types/BasicTypes.hpp"
-#include <Fw/Logger/Logger.hpp>
 
 namespace BMP388Module {
 
@@ -29,10 +27,10 @@ namespace BMP388Module {
   }
 
   // ----------------------------------------------------------------------
-  // Handler implementations for user-defined typed input ports
+  // Handler implementations for commands
   // ----------------------------------------------------------------------
 
-  void BMP388 ::
+ void BMP388 ::
     SchedIn_handler(
         NATIVE_INT_TYPE portNum,
         NATIVE_UINT_TYPE context
@@ -79,6 +77,7 @@ namespace BMP388Module {
     */
     
     // initializing read/write buffers
+    // we use these whenever reading or writing
     Fw::Buffer dataGet = this->allocate_out(0, sizeof(U8));
     Fw::Buffer dataSend = this->allocate_out(0, sizeof(U8));
 
@@ -97,13 +96,42 @@ namespace BMP388Module {
 
     // step 1: check for errors
     Drv::I2cStatus status;
-    U8 tmpdata = ERR_REG;
-    status = this->I2C_Read_out(0, SLAVE_ADDR, tmpdata);
+    //setting tempdata to the address of the status register
+    //serializing to ensure correct data type
+    dataSend.getSerializeRepr().resetSer();
+    dataSend.getSerializeRepr().serialize(ERR_REG);
+    //writereading to shorten the steps. must 1. write desired register, then 2. read
+    status = this->I2C_WriteRead_out(0, SLAVE_ADDR, dataSend, dataGet);
     if (status != Drv::I2cStatus::I2C_OK)
     {
       Fw::Logger::logMsg("I2cWriteRead Failed\n");
     }
+    U8 errstatus = *dataGet.getData();
 
+    // checking if errors are detected on bits 0 1 or 2 of the error register
+    if ((errstatus & 2^7) || (errstatus & 2^6) || (errstatus & 2^5)){
+      Fw::Logger::logMsg("Error initializing sensor\n");
+    }
+
+    // step 2: check if data ready
+    dataSend.getSerializeRepr().resetSer();
+    dataSend.getSerializeRepr().serialize(STATUS);
+    status = this->I2C_WriteRead_out(0, SLAVE_ADDR, dataSend, dataGet);
+    if (status != Drv::I2cStatus::I2C_OK)
+    {
+      Fw::Logger::logMsg("I2cWriteRead Failed\n");
+    }
+    U8 sensorstatus = *dataGet.getData();
+    //checking that bits 4 5 and 6 are true indicating ready for command, pressure data ready, and temp data ready respectively
+    if (sensorstatus & 2^1){
+      Fw::Logger::logMsg("Temperature data ready\n");
+    }
+    if (sensorstatus & 2^2){
+      Fw::Logger::logMsg("Pressure data ready\n");
+    }
+    if (sensorstatus & 2^3){
+      Fw::Logger::logMsg("Sensor ready to recieve commands\n");
+    }
 
 
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);

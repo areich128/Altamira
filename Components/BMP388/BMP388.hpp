@@ -8,6 +8,8 @@
 #define BMP388Module_BMP388_HPP
 
 #include "Components/BMP388/BMP388ComponentAc.hpp"
+#include "Fw/Types/BasicTypes.hpp"
+#include <Fw/Logger/Logger.hpp>
 
 // REGISTERS SPECIFIED HERE
 const U8 SLAVE_ADDR = 0x77;
