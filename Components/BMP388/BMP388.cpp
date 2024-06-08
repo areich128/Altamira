@@ -94,6 +94,8 @@ namespace BMP388Module {
       return;
     }
 
+    //might want to check for WHOAMI first
+
     // step 1: check for errors
     Drv::I2cStatus status;
     //setting tempdata to the address of the status register
@@ -134,6 +136,9 @@ namespace BMP388Module {
     }
 
 
+
+    this->deallocate_out(dataGet);
+    this->deallocate_out(dataSend);
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
   }
 
