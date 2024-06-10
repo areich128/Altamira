@@ -61,7 +61,7 @@ namespace BMP388Module {
     //TEMPERATURE
     //reading temperature calibration coefficients
     U8 temp_cal_coeffs[5];
-    U8 temp_cal_coeff_reg[] = {NVM_PAR_T3, 
+    U8 temp_cal_coeff_reg[] = {NVM_PAR_T3, //ALERT! THIS IS AN I8 not a U8, HOW TO DEAL WITH THIS?
                               NVM_PAR_T2_2, 
                               NVM_PAR_T2_1, 
                               NVM_PAR_T1_2, 
@@ -82,7 +82,7 @@ namespace BMP388Module {
     float PAR_T1, PAR_T2, PAR_T3, cal_temp;
     PAR_T1 = NVM_PAR_T1 / (2^(-8));
     PAR_T2 = NVM_PAR_T2 / (2^30);
-    PAR_T3 = temp_cal_coeffs[0] / (2^48);
+    PAR_T3 = I8(temp_cal_coeffs[0]) / (2^48); //will this typecast work?
 
     float partial_data1, partial_data2;
 
@@ -105,12 +105,45 @@ namespace BMP388Module {
     partial_data2 = partial_data1 * PAR_T2;
     
     float temp = partial_data2 + (partial_data1 * partial_data1) * PAR_T3;
+    //writing temp data to telemetry channel
+    tlmWrite_TEMP(temp);
 
+    //PRESSURE
+    //reading coefficients
+    U8 pres_cal_coeffs[16];
+    U8 pres_cal_coeff_reg[] = {NVM_PAR_P11,
+                              NVM_PAR_P10, 
+                              NVM_PAR_P9_1,
+                              NVM_PAR_P9_2,
+                              NVM_PAR_P8,
+                              NVM_PAR_P7,
+                              NVM_PAR_P6_1,
+                              NVM_PAR_P6_2,
+                              NVM_PAR_P5_1,
+                              NVM_PAR_P5_2,
+                              NVM_PAR_P4,
+                              NVM_PAR_P3,
+                              NVM_PAR_P2_1,
+                              NVM_PAR_P2_2,
+                              NVM_PAR_P1_1,
+                              NVM_PAR_P1_2};
 
+    for (NATIVE_INT_TYPE buffer = 0; buffer < sizeof(pres_cal_coeff_reg); buffer++) {
+      dataSend.getSerializeRepr().resetSer();
+      dataSend.getSerializeRepr().serialize(pres_cal_coeff_reg[buffer]);
+      status = this->I2C_WriteRead_out(0, SLAVE_ADDR, dataSend, dataGet);
+      if(status!=Drv::I2cStatus::I2C_OK){
+        Fw::Logger::logMsg("I2cWriteRead Failed\n");
+      }
+      pres_cal_coeffs[buffer]=*dataGet.getData();
+    }
+    float NVM_PAR_P9, NVM_PAR_P6, NVM_PAR_P5, NVM_PAR_P2, NVM_PAR_P1;
+    NVM_PAR_P9 = (pres_cal_coeffs[3] * 2^8) + pres_cal_coeffs[2];
+    NVM_PAR_P6 = (pres_cal_coeffs[7] * 2^8) + pres_cal_coeffs[6];
+    NVM_PAR_P5 = (pres_cal_coeffs[9] * 2^8) + pres_cal_coeffs[8];
     // AFTER ALL THE CALIBRATION CODE ETC. WE DO
     // tlmWrite_ALTITUDE(altitude);
     // tlmWrite_PRESSURE(pressure);
-    tlmWrite_TEMP(temp);
 
     this->deallocate_out(portNum,dataGet);
     this->deallocate_out(portNum,dataSend);

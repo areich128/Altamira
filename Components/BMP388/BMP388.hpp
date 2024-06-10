@@ -34,6 +34,7 @@ const U8 TDATA_2 = 0x09; //bits 16-23 of temp reading
 
 //CALIBRATION COEFFICIENT REGISTERS
 // pressure
+//NOTE: the registers should not be I8, but the data will be. something needs to change here
 const I8 NVM_PAR_P11 = 0x45;
 const I8 NVM_PAR_P10 = 0x44;
 const I8 NVM_PAR_P9_1 = 0x43;
