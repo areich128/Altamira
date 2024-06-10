@@ -58,9 +58,9 @@ const U8 NVM_PAR_T2_2 = 0x33;
 const U8 NVM_PAR_T1_1 = 0x32;
 const U8 NVM_PAR_T1_2 = 0x31;
 
-
 // MODE/POWER CONTROL
 const U8 PWR_CTRL = 0x1B; //bit 0: pressure sensor on/off, 1: temp on/off, 4/5: sleep(00)/normal(11)/forced(10 || 01)
+const U8 EVENT = 0x10; //bit 0 reads 1 after powerup or soft reset, cleared on read
 
 #include <unistd.h> // required for I2C device access
 #include <fcntl.h>  // required for I2C device configuration
