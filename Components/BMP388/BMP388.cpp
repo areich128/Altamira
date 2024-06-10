@@ -141,6 +141,31 @@ namespace BMP388Module {
     NVM_PAR_P9 = (pres_cal_coeffs[3] * 2^8) + pres_cal_coeffs[2];
     NVM_PAR_P6 = (pres_cal_coeffs[7] * 2^8) + pres_cal_coeffs[6];
     NVM_PAR_P5 = (pres_cal_coeffs[9] * 2^8) + pres_cal_coeffs[8];
+    NVM_PAR_P2 = (pres_cal_coeffs[13] * 2^8) + pres_cal_coeffs[12];
+    NVM_PAR_P1 = (pres_cal_coeffs[15] * 2^8) + pres_cal_coeffs[14];
+
+    float PAR_P1, PAR_P2, PAR_P3, PAR_P4, PAR_P5, PAR_P6, PAR_P7, PAR_P8, PAR_P9, PAR_P10, PAR_P11;
+    PAR_P1 = NVM_PAR_P1 / (2^(-8));
+    PAR_P2 = (NVM_PAR_P2 - (2^14))/ (2^29);
+    PAR_P3 = pres_cal_coeffs[11] / (2^32);
+    PAR_P4 = pres_cal_coeffs[10] / (2^37);
+    PAR_P5 = NVM_PAR_P5 / (2^(-3));
+    PAR_P6 = NVM_PAR_P6 / (2^6);
+    PAR_P7 = pres_cal_coeffs[5] / (2^8);
+    PAR_P8 = pres_cal_coeffs[4] / (2^15);
+    PAR_P9 = NVM_PAR_P9 / (2^48);
+    PAR_P10 = pres_cal_coeffs[1] / (2^48);
+    PAR_P11 = pres_cal_coeffs[0] / (2^65);
+
+    float pressure, partiald1, partiald2, partiald3, partiald4, partialo1, partialo2;
+    partiald1 = PAR_P6 * temp;
+    partiald2 = PAR_P7 * (temp * temp);
+    partiald3 = PAR_P8 * (temp * temp * temp);
+    partialo1 = PAR_P5 + partiald1 + partiald2 + partiald3;
+    // need to do some refactoring here:
+      // 1. this calibration may need to go in the startup to prevent unneccessary load
+      // 2. need to figure out which calibration coeffs need to be typecast to I8s
+
     // AFTER ALL THE CALIBRATION CODE ETC. WE DO
     // tlmWrite_ALTITUDE(altitude);
     // tlmWrite_PRESSURE(pressure);
