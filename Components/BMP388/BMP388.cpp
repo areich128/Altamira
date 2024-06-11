@@ -82,7 +82,7 @@ namespace BMP388Module {
     float PAR_T1, PAR_T2, PAR_T3, cal_temp;
     PAR_T1 = NVM_PAR_T1 / (2^(-8));
     PAR_T2 = NVM_PAR_T2 / (2^30);
-    PAR_T3 = I8(temp_cal_coeffs[0]) / (2^48); //will this typecast work?
+    PAR_T3 = float(temp_cal_coeffs[0]) / (2^48); //will this typecast work?
 
     float partial_data1, partial_data2;
 
@@ -91,7 +91,7 @@ namespace BMP388Module {
     U8 temp_data_reg[] = {TDATA_0, TDATA_1, TDATA_2};
     for (NATIVE_INT_TYPE buffer = 0; buffer < sizeof(temp_data_reg); buffer++) {
       dataSend.getSerializeRepr().resetSer();
-      dataSend.getSerializeRepr().serialize(temp_cal_coeff_reg[buffer]);
+      dataSend.getSerializeRepr().serialize(temp_data_reg[buffer]);
       status = this->I2C_WriteRead_out(0, SLAVE_ADDR, dataSend, dataGet);
       if(status!=Drv::I2cStatus::I2C_OK){
         Fw::Logger::logMsg("I2cWriteRead Failed\n");
@@ -138,30 +138,67 @@ namespace BMP388Module {
       pres_cal_coeffs[buffer]=*dataGet.getData();
     }
     float NVM_PAR_P9, NVM_PAR_P6, NVM_PAR_P5, NVM_PAR_P2, NVM_PAR_P1;
-    NVM_PAR_P9 = (pres_cal_coeffs[3] * 2^8) + pres_cal_coeffs[2];
+    NVM_PAR_P9 = I16((pres_cal_coeffs[3] * 2^8) + pres_cal_coeffs[2]);
     NVM_PAR_P6 = (pres_cal_coeffs[7] * 2^8) + pres_cal_coeffs[6];
     NVM_PAR_P5 = (pres_cal_coeffs[9] * 2^8) + pres_cal_coeffs[8];
-    NVM_PAR_P2 = (pres_cal_coeffs[13] * 2^8) + pres_cal_coeffs[12];
+    NVM_PAR_P2 = I16((pres_cal_coeffs[13] * 2^8) + pres_cal_coeffs[12]);
     NVM_PAR_P1 = (pres_cal_coeffs[15] * 2^8) + pres_cal_coeffs[14];
 
     float PAR_P1, PAR_P2, PAR_P3, PAR_P4, PAR_P5, PAR_P6, PAR_P7, PAR_P8, PAR_P9, PAR_P10, PAR_P11;
-    PAR_P1 = NVM_PAR_P1 / (2^(-8));
-    PAR_P2 = (NVM_PAR_P2 - (2^14))/ (2^29);
-    PAR_P3 = pres_cal_coeffs[11] / (2^32);
-    PAR_P4 = pres_cal_coeffs[10] / (2^37);
+    PAR_P1 = float(NVM_PAR_P1 / (2^(-8)));
+    PAR_P2 = float((NVM_PAR_P2 - (2^14))/ (2^29));
+    PAR_P3 = float(pres_cal_coeffs[11] / (2^32));
+    PAR_P4 = float(pres_cal_coeffs[10] / (2^37));
     PAR_P5 = NVM_PAR_P5 / (2^(-3));
     PAR_P6 = NVM_PAR_P6 / (2^6);
-    PAR_P7 = pres_cal_coeffs[5] / (2^8);
-    PAR_P8 = pres_cal_coeffs[4] / (2^15);
-    PAR_P9 = NVM_PAR_P9 / (2^48);
-    PAR_P10 = pres_cal_coeffs[1] / (2^48);
-    PAR_P11 = pres_cal_coeffs[0] / (2^65);
+    PAR_P7 = float(pres_cal_coeffs[5] / (2^8));
+    PAR_P8 = float(pres_cal_coeffs[4] / (2^15));
+    PAR_P9 = float(NVM_PAR_P9 / (2^48));
+    PAR_P10 = float(pres_cal_coeffs[1] / (2^48));
+    PAR_P11 = float(pres_cal_coeffs[0] / (2^65));
 
+    // crazy calibration formulas courtesy of the datasheet
     float pressure, partiald1, partiald2, partiald3, partiald4, partialo1, partialo2;
     partiald1 = PAR_P6 * temp;
     partiald2 = PAR_P7 * (temp * temp);
     partiald3 = PAR_P8 * (temp * temp * temp);
     partialo1 = PAR_P5 + partiald1 + partiald2 + partiald3;
+
+    partiald1 = PAR_P2 * temp;
+    partiald2 = PAR_P3 * (temp * temp);
+    partiald3 = PAR_P4 * (temp * temp * temp);
+
+    U8 pres_data[3];
+    U8 pres_data_reg[] = {PDATA_0, PDATA_1, PDATA_2};
+    for (NATIVE_INT_TYPE buffer = 0; buffer < sizeof(pres_data_reg); buffer++) {
+      dataSend.getSerializeRepr().resetSer();
+      dataSend.getSerializeRepr().serialize(pres_data_reg[buffer]);
+      status = this->I2C_WriteRead_out(0, SLAVE_ADDR, dataSend, dataGet);
+      if(status!=Drv::I2cStatus::I2C_OK){
+        Fw::Logger::logMsg("I2cWriteRead Failed\n");
+      }
+      pres_data[buffer]=*dataGet.getData();
+    }
+    U32 uncal_pres = (pres_data[2] * (2^16)) + (pres_data[1] * (2^8)) + pres_data[0];
+
+    partialo2 = (float)uncal_pres * (PAR_P1 + partiald1 + partiald2 + partiald3);
+
+    partiald1 = (float)uncal_pres * (float)uncal_pres;
+    partiald2 = PAR_P9 + PAR_P10 * temp;
+    partiald3 = partiald1 * partiald2;
+
+    pressure = partialo1 + partialo2 + partiald3 + partiald4;
+    //writing pressure to telemetry channel
+    tlmWrite_PRESSURE(pressure);
+
+    //ALTITUDE
+    //formula obtained from the arduino sample code here: https://github.com/adafruit/Adafruit_BMP3XX/blob/master/Adafruit_BMP3XX.cpp 
+    float seaLevel = 1013.25;
+    float atmos = pressure / 100.0;
+    float altitude = 44330.0 * (1.0 - pow(atmos / seaLevel, 0.1903f));
+    //writing altitude estimate to telemetry channel
+    tlmWrite_ALTITUDE(altitude);
+
     // need to do some refactoring here:
       // 1. this calibration may need to go in the startup to prevent unneccessary load
       // 2. need to figure out which calibration coeffs need to be typecast to I8s

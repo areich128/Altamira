@@ -67,6 +67,7 @@ const U8 EVENT = 0x10; //bit 0 reads 1 after powerup or soft reset, cleared on r
 #include <fcntl.h>  // required for I2C device configuration
 #include <cerrno>
 #include <unistd.h>
+#include <cmath>
 
 namespace BMP388Module {
 
