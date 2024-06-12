@@ -35,25 +35,25 @@ const U8 TDATA_2 = 0x09; //bits 16-23 of temp reading
 //CALIBRATION COEFFICIENT REGISTERS
 // pressure
 //NOTE: the registers should not be I8, but the data will be. something needs to change here
-const I8 NVM_PAR_P11 = 0x45;
-const I8 NVM_PAR_P10 = 0x44;
-const I8 NVM_PAR_P9_1 = 0x43;
-const I8 NVM_PAR_P9_2 = 0x42;
-const I8 NVM_PAR_P8 = 0x41;
-const I8 NVM_PAR_P7 = 0x40;
+const U8 NVM_PAR_P11 = 0x45;
+const U8 NVM_PAR_P10 = 0x44;
+const U8 NVM_PAR_P9_1 = 0x43;
+const U8 NVM_PAR_P9_2 = 0x42;
+const U8 NVM_PAR_P8 = 0x41;
+const U8 NVM_PAR_P7 = 0x40;
 const U8 NVM_PAR_P6_1 = 0x3F;
 const U8 NVM_PAR_P6_2 = 0x3E;
 const U8 NVM_PAR_P5_1 = 0x3D;
 const U8 NVM_PAR_P5_2 = 0x3C;
-const I8 NVM_PAR_P4 = 0x3B;
-const I8 NVM_PAR_P3 = 0x3A;
-const I8 NVM_PAR_P2_1 = 0x39;
-const I8 NVM_PAR_P2_2 = 0x38;
-const I8 NVM_PAR_P1_1 = 0x37;
-const I8 NVM_PAR_P1_2 = 0x36;
+const U8 NVM_PAR_P4 = 0x3B;
+const U8 NVM_PAR_P3 = 0x3A;
+const U8 NVM_PAR_P2_1 = 0x39;
+const U8 NVM_PAR_P2_2 = 0x38;
+const U8 NVM_PAR_P1_1 = 0x37;
+const U8 NVM_PAR_P1_2 = 0x36;
 
 //temp
-const I8 NVM_PAR_T3 = 0x35;
+const U8 NVM_PAR_T3 = 0x35;
 const U8 NVM_PAR_T2_1 = 0x34;
 const U8 NVM_PAR_T2_2 = 0x33;
 const U8 NVM_PAR_T1_1 = 0x32;
