@@ -45,11 +45,11 @@ markdown-it-py
 MarkupSafe
 mdurl
 openpyxl
-packaging=
+packaging
 pexpect
 pluggy
 ptyprocess
-Pygments=
+Pygments
 pyserial
 pytest
 python-dateutil
