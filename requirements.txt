@@ -12,7 +12,6 @@ click
 cookiecutter
 et-xmlfile
 exceptiongroup
-flask
 fprime-fpl-convert-xml
 fprime-fpl-extract-xml
 fprime-fpl-layout
