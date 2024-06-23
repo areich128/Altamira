@@ -13,8 +13,6 @@ cookiecutter
 et-xmlfile
 exceptiongroup
 Flask
-Flask-Compress
-Flask-RESTful
 fprime-fpl-convert-xml
 fprime-fpl-extract-xml
 fprime-fpl-layout
