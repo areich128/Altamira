@@ -4,10 +4,19 @@
 // \brief  cpp file for BNO085 component implementation class
 // ======================================================================
 
-#include "BNO085/BNO085.hpp"
+#include "Components/BNO085/BNO085.hpp"
 #include "FpConfig.hpp"
 
+#include "Fw/Types/BasicTypes.hpp"
+#include <Fw/Logger/Logger.hpp>
+
 namespace BNO085Module {
+
+  //SHTP Packet Creation function
+  Fw::Buffer BNO085::createSHTP(){
+    Fw::Buffer packet = this->allocate_out(0, sizeof(U8));
+    
+  }
 
   // ----------------------------------------------------------------------
   // Component construction and destruction
@@ -27,6 +36,19 @@ namespace BNO085Module {
   }
 
   // ----------------------------------------------------------------------
+  // Handler implementations for user-defined typed input ports
+  // ----------------------------------------------------------------------
+
+  void BNO085 ::
+    SchedIn_handler(
+        NATIVE_INT_TYPE portNum,
+        NATIVE_UINT_TYPE context
+    )
+  {
+    // TODO
+  }
+
+  // ----------------------------------------------------------------------
   // Handler implementations for commands
   // ----------------------------------------------------------------------
 
@@ -37,6 +59,19 @@ namespace BNO085Module {
     )
   {
     // TODO
+    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+  }
+
+  void BNO085 ::
+    startup_BNO085_cmdHandler(
+        FwOpcodeType opCode,
+        U32 cmdSeq
+    )
+  {
+    // TODO
+
+    //WHOAMI check, error code checking, and calibration?
+
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
   }
 
