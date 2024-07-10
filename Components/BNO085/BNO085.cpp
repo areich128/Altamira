@@ -7,7 +7,7 @@
 #include "Components/BNO085/BNO085.hpp"
 #include "FpConfig.hpp"
 
-#include "Fw/Types/BasicTypes.hpp"
+#include <Fw/Types/BasicTypes.hpp>
 #include <Fw/Logger/Logger.hpp>
 
 namespace BNO085Module {
@@ -16,6 +16,9 @@ namespace BNO085Module {
   Fw::Buffer BNO085::createSHTP(){
     Fw::Buffer packet = this->allocate_out(0, sizeof(U8));
     
+    
+
+    return packet;
   }
 
   // ----------------------------------------------------------------------
